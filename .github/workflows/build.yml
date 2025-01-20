@@ -20,8 +20,8 @@ jobs:
       - run: ./gradlew windowsArm64Zip
       - uses: actions/upload-artifact@v4
         with:
-          name: leveldb-windows-arm64
-          path: build/archives/leveldb-windows-arm64.zip
+          name: xdiff-windows-arm64
+          path: build/archives/xdiff-windows-arm64.zip
 
   windows-x64:
     name: Windows x64
@@ -42,8 +42,8 @@ jobs:
       - run: ./gradlew windowsX64Zip
       - uses: actions/upload-artifact@v4
         with:
-          name: leveldb-windows-x64
-          path: build/archives/leveldb-windows-x64.zip
+          name: xdiff-windows-x64
+          path: build/archives/xdiff-windows-x64.zip
 
   android:
     name: Android
@@ -57,8 +57,8 @@ jobs:
       - run: ./gradlew androidZip
       - uses: actions/upload-artifact@v4
         with:
-          name: leveldb-android
-          path: build/archives/leveldb-android.zip
+          name: xdiff-android
+          path: build/archives/xdiff-android.zip
 
   linux:
     name: Linux
@@ -82,8 +82,8 @@ jobs:
       - run: ./gradlew linuxZip
       - uses: actions/upload-artifact@v4
         with:
-          name: leveldb-linux
-          path: build/archives/leveldb-linux.zip
+          name: xdiff-linux
+          path: build/archives/xdiff-linux.zip
 
   macos:
     name: macOS
@@ -97,8 +97,8 @@ jobs:
       - run: ./gradlew appleZip
       - uses: actions/upload-artifact@v4
         with:
-          name: leveldb-apple
-          path: build/archives/leveldb-apple.zip
+          name: xdiff-apple
+          path: build/archives/xdiff-apple.zip
 
   publish-release-with-files:
     name: Create Publication
@@ -114,15 +114,15 @@ jobs:
       - run: ./gradlew mergeZips
       - uses: actions/upload-artifact@v4
         with:
-          name: leveldb
-          path: build/archives/leveldb.zip
+          name: xdiff
+          path: build/archives/xdiff.zip
       - name: Set current date as env variable
         id: set_date
         run: echo "NOW=$(date +'%Y%m%dT%H%M%S')Z" >> $GITHUB_OUTPUT
       - run: tree
       - uses: softprops/action-gh-release@v2
         with:
-          files: build/archives/leveldb.zip
+          files: build/archives/xdiff.zip
           name: v${{ steps.set_date.outputs.NOW }}-SNAPSHOT
           tag_name: ${{ steps.set_date.outputs.NOW }}
           draft: false
