@@ -35,8 +35,7 @@ tasks {
         val os = OperatingSystem.current()
         val zipTasks = when {
             os.isMacOsX -> listOf(appleZip, androidZip)
-            os.isLinux -> listOf(linuxZip, androidZip, windowsX64Zip, windowsArm64Zip)
-            os.isWindows -> listOf(windowsX64Zip, windowsArm64Zip, androidZip)
+            os.isLinux -> listOf(linuxZip, androidZip)
             else -> listOf(androidZip)
         }
 
