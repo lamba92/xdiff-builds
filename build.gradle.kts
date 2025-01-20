@@ -39,11 +39,11 @@ tasks {
             else -> listOf(androidZip)
         }
 
-        from("xdiff/include") {
+        from("xdiff") {
             into("headers/include")
             include("**/*.h")
         }
-
+        includeEmptyDirs = false
         dependsOn(zipTasks)
         archiveBaseName = "xdiff-test"
         destinationDirectory = layout.buildDirectory.dir("archives")
