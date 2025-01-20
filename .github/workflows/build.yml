@@ -1,0 +1,129 @@
+name: Build xdiff
+
+on: [ push ]
+
+permissions:
+  contents: write
+
+jobs:
+  windows-arm64:
+    name: Windows ARM64
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - run: choco install cmake --no-progress -y
+      - run: choco install mingw --no-progress --version=8.1.0 -y
+      - run: choco install llvm --no-progress -y
+      - uses: gradle/actions/setup-gradle@v3
+      - run: ./gradlew windowsArm64Zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: leveldb-windows-arm64
+          path: build/archives/leveldb-windows-arm64.zip
+
+  windows-x64:
+    name: Windows x64
+    runs-on: ubuntu-latest
+    container:
+      image: gcc:8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - run: apt-get update && apt-get install -y mingw-w64 cmake
+      - uses: actions/setup-java@v4
+        with:
+          distribution: adopt
+          java-version: 21
+      - run: chmod +x gradlew
+      - uses: gradle/actions/setup-gradle@v3
+      - run: ./gradlew windowsX64Zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: leveldb-windows-x64
+          path: build/archives/leveldb-windows-x64.zip
+
+  android:
+    name: Android
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - run: chmod +x gradlew
+      - uses: gradle/actions/setup-gradle@v3
+      - run: ./gradlew androidZip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: leveldb-android
+          path: build/archives/leveldb-android.zip
+
+  linux:
+    name: Linux
+    container:
+      image: gcc:8
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - run: apt-get update
+      - run: apt-get install -y cmake
+      - run: apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+      - run: apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+      - uses: actions/setup-java@v4
+        with:
+          distribution: adopt
+          java-version: 21
+      - run: chmod +x gradlew
+      - uses: gradle/actions/setup-gradle@v3
+      - run: ./gradlew linuxZip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: leveldb-linux
+          path: build/archives/leveldb-linux.zip
+
+  macos:
+    name: macOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - run: chmod +x gradlew
+      - uses: gradle/actions/setup-gradle@v3
+      - run: ./gradlew appleZip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: leveldb-apple
+          path: build/archives/leveldb-apple.zip
+
+  publish-release-with-files:
+    name: Create Publication
+    needs: [windows-arm64, windows-x64, android, linux, macos]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/download-artifact@v4
+      - run: chmod +x gradlew
+      - uses: gradle/gradle-build-action@v3
+      - run: ./gradlew mergeZips
+      - uses: actions/upload-artifact@v4
+        with:
+          name: leveldb
+          path: build/archives/leveldb.zip
+      - name: Set current date as env variable
+        id: set_date
+        run: echo "NOW=$(date +'%Y%m%dT%H%M%S')Z" >> $GITHUB_OUTPUT
+      - run: tree
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: build/archives/leveldb.zip
+          name: v${{ steps.set_date.outputs.NOW }}-SNAPSHOT
+          tag_name: ${{ steps.set_date.outputs.NOW }}
+          draft: false
+          prerelease: false
