@@ -15,8 +15,10 @@ data class BuildConfig(
 val matrix = buildList {
     add(BuildConfig(isDebug = false, isShared = false))
     add(BuildConfig(isDebug = false, isShared = true))
-    add(BuildConfig(isDebug = true, isShared = false))
-    add(BuildConfig(isDebug = true, isShared = true))
+
+    // Debug builds disabled because symbol `xdl_regexec_buf` cannot be found in debug
+//    add(BuildConfig(isDebug = true, isShared = false))
+//    add(BuildConfig(isDebug = true, isShared = true))
 }
 
 fun withMatrix(

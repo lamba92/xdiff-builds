@@ -40,29 +40,29 @@ tasks {
             else -> listOf(androidZip)
         }
 
-        from("leveldb/include") {
+        from("xdiff/include") {
             into("headers/include")
-            include("**/c.h", "**/export.h")
+            include("**/*.h")
         }
 
         dependsOn(zipTasks)
-        archiveBaseName = "leveldb-test"
+        archiveBaseName = "xdiff-test"
         destinationDirectory = layout.buildDirectory.dir("archives")
         zipTasks.forEach { from(it.flatMap { it.archiveFile }.map { zipTree(it) }) }
     }
 
     register<Zip>("mergeZips") {
-        archiveBaseName = "leveldb"
+        archiveBaseName = "xdiff"
         destinationDirectory = layout.buildDirectory.dir("archives")
 
         from("leveldb/include") {
             into("headers/include")
-            include("**/c.h", "**/export.h")
+            include("**/*.h")
         }
 
         // Merge all zips in the project directory when running in CI
         Path(".").walk()
-            .filter { it.name.startsWith("leveldb-") && it.name.endsWith(".zip") }
+            .filter { it.name.startsWith("xdiff-") && it.name.endsWith(".zip") }
             .forEach { from(zipTree(it)) }
     }
 }
