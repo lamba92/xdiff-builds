@@ -109,6 +109,11 @@ open class BuildXdiff @Inject constructor(
     @get:Optional
     val androidStlType = objectFactory.property<String>()
 
+    //-DCMAKE_OSX_DEPLOYMENT_TARGET
+    @get:Input
+    @get:Optional
+    val osxDeploymentTarget = objectFactory.property<String>()
+
     fun outputDir(dir: Provider<Directory>, artifactName: String) {
         outputDir = dir
         outputArtifact = dir.map { it.file(artifactName) }
@@ -153,6 +158,7 @@ open class BuildXdiff @Inject constructor(
         add("-DBUILD_SHARED_LIBS=${shared.get().asString()}")
         add("-DCMAKE_C_COMPILER=${cCompiler.get()}")
         systemProcessorName.orNull?.let { add("-DCMAKE_SYSTEM_PROCESSOR=$it") }
+        osxDeploymentTarget.orNull?.let { add("-DCMAKE_OSX_DEPLOYMENT_TARGET=$it") }
 
         cFlags.get()
             .takeIf { it.isNotEmpty() }

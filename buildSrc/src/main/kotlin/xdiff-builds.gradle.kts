@@ -227,6 +227,9 @@ val appleTasks = appleTargets.flatMap { (arch, sysName, sysRoot) ->
             osxSysroot = sysRoot
             outputDir(xdiffBuildDir.map { it.dir(dirPath(arch)) }, "libxdiff.$extension")
             sourcesDir = xdiffSourcesDir
+            if (sysRoot == "macosx") {
+                osxDeploymentTarget = "11.0"
+            }
         })
     }
 }
