@@ -75,6 +75,7 @@ val windowsTasks =
             shared = isShared
             cCompiler = "x86_64-w64-mingw32-gcc-posix"
             systemName = "Windows"
+            cFlags = listOf("-Wl,-Bstatic", "-lpcre2-posix", "-lpcre2-8", "-Wl,-Bdynamic") // Link statically to pcre2 to avoid DLL hell
             output(xdiffBuildDir.map { it.dir(dirPath("x64")) }, "libxdiff.$ext")
             sourcesDir = xdiffSourcesDir
         })
