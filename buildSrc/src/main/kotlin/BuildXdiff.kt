@@ -114,7 +114,7 @@ open class BuildXdiff @Inject constructor(
     @get:Optional
     val osxDeploymentTarget = objectFactory.property<String>()
 
-    fun outputDir(dir: Provider<Directory>, artifactName: String) {
+    fun output(dir: Provider<Directory>, artifactName: String) {
         outputDir = dir
         outputArtifact = dir.map { it.file(artifactName) }
     }
