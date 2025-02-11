@@ -63,6 +63,37 @@ fun withMatrix(
 
 val xdiffSourcesDir = layout.projectDirectory.dir("xdiff")
 
+// Windows
+val windowsTasks =
+    withMatrix("windows") { isDebug, isShared, baseTaskName, dirPath ->
+        val ext = when {
+            isShared -> ".lib"
+            else -> "a"
+        }
+        add(tasks.register<BuildXdiff>("${baseTaskName}X64") {
+            debug = isDebug
+            shared = isShared
+            cCompiler = "x86_64-w64-mingw32-gcc-posix"
+            systemName = "Windows"
+            cFlags = listOf("-Wl,-Bstatic", "-lpcre2-posix", "-lpcre2-8", "-Wl,-Bdynamic") // Link statically to pcre2 to avoid DLL hell
+            output(xdiffBuildDir.map { it.dir(dirPath("x64")) }, "libxdiff.$ext")
+            sourcesDir = xdiffSourcesDir
+        })
+    }
+
+tasks.register<Zip>("windowsZip") {
+    dependsOn(windowsTasks)
+    windowsTasks.forEach { task ->
+        from(task.flatMap { it.outputArtifact }) {
+            eachFile {
+                path = file.toPath().relativeTo(xdiffBuildDirPath.get()).toString()
+            }
+        }
+    }
+    archiveBaseName = "xdiff-windows"
+    destinationDirectory = layout.buildDirectory.dir("archives")
+}
+
 // Linux
 val linuxTasks =
     withMatrix("linux") { isDebug, isShared, baseTaskName, dirPath ->
@@ -74,7 +105,7 @@ val linuxTasks =
             debug = isDebug
             shared = isShared
             cCompiler = "gcc-8"
-            outputDir(xdiffBuildDir.map { it.dir(dirPath("x64")) }, "libxdiff.$ext")
+            output(xdiffBuildDir.map { it.dir(dirPath("x64")) }, "libxdiff.$ext")
             sourcesDir = xdiffSourcesDir
         })
 
@@ -82,7 +113,7 @@ val linuxTasks =
             debug = isDebug
             shared = isShared
             cCompiler = "aarch64-linux-gnu-gcc-8"
-            outputDir(xdiffBuildDir.map { it.dir(dirPath("arm64")) }, "libxdiff.$ext")
+            output(xdiffBuildDir.map { it.dir(dirPath("arm64")) }, "libxdiff.$ext")
             sourcesDir = xdiffSourcesDir
         })
 
@@ -90,7 +121,7 @@ val linuxTasks =
             debug = isDebug
             shared = isShared
             cCompiler = "arm-linux-gnueabihf-gcc-8"
-            outputDir(xdiffBuildDir.map { it.dir(dirPath("armv7a")) }, "libxdiff.$ext")
+            output(xdiffBuildDir.map { it.dir(dirPath("armv7a")) }, "libxdiff.$ext")
             sourcesDir = xdiffSourcesDir
         })
     }
@@ -127,7 +158,7 @@ val androidTasks =
             androidAbi = "arm64-v8a"
             shared = isShared
             debug = isDebug
-            outputDir(xdiffBuildDir.map { it.dir(dirPath("arm64")) }, "libxdiff.$ext")
+            output(xdiffBuildDir.map { it.dir(dirPath("arm64")) }, "libxdiff.$ext")
             sourcesDir = xdiffSourcesDir
         })
 
@@ -139,7 +170,7 @@ val androidTasks =
             androidAbi = "armeabi-v7a"
             shared = isShared
             debug = isDebug
-            outputDir(xdiffBuildDir.map { it.dir(dirPath("armv7a")) }, "libxdiff.$ext")
+            output(xdiffBuildDir.map { it.dir(dirPath("armv7a")) }, "libxdiff.$ext")
             sourcesDir = xdiffSourcesDir
         })
 
@@ -151,7 +182,7 @@ val androidTasks =
             androidAbi = "x86"
             shared = isShared
             debug = isDebug
-            outputDir(xdiffBuildDir.map { it.dir(dirPath("x86")) }, "libxdiff.$ext")
+            output(xdiffBuildDir.map { it.dir(dirPath("x86")) }, "libxdiff.$ext")
             sourcesDir = xdiffSourcesDir
         })
 
@@ -163,7 +194,7 @@ val androidTasks =
             androidAbi = "x86_64"
             shared = isShared
             debug = isDebug
-            outputDir(xdiffBuildDir.map { it.dir(dirPath("x64")) }, "libxdiff.$ext")
+            output(xdiffBuildDir.map { it.dir(dirPath("x64")) }, "libxdiff.$ext")
             sourcesDir = xdiffSourcesDir
         })
     }
@@ -225,7 +256,7 @@ val appleTasks = appleTargets.flatMap { (arch, sysName, sysRoot) ->
             systemName = sysName
             osxArch = arch
             osxSysroot = sysRoot
-            outputDir(xdiffBuildDir.map { it.dir(dirPath(arch)) }, "libxdiff.$extension")
+            output(xdiffBuildDir.map { it.dir(dirPath(arch)) }, "libxdiff.$extension")
             sourcesDir = xdiffSourcesDir
             if (sysRoot == "macosx") {
                 osxDeploymentTarget = "11.0"

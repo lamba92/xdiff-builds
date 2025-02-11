@@ -46,6 +46,7 @@ tasks {
         val zipTasks = when {
             os.isMacOsX -> listOf(appleZip, androidZip)
             os.isLinux -> listOf(linuxZip, androidZip)
+            os.isWindows -> listOf(windowsZip, androidZip)
             else -> listOf(androidZip)
         }
         dependsOn(zipTasks)
